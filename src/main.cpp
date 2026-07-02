@@ -8,7 +8,7 @@ const int LARGURA = 800;
 const int ALTURA = 600;
 const float FPS = 60.0;
 
-int main() {
+int main(int argc, char **argv) {
     if(!al_init()) {
         fprintf(stderr, "Falha ao inicializar Allegro.\n");
         return -1;

@@ -11,6 +11,7 @@ pkg_check_modules(ALLEGRO REQUIRED
     allegro_font-5
     allegro_ttf-5
     allegro_primitives-5
+    allegro_main-5
 )
 
 include_directories(
