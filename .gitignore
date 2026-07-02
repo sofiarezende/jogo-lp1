@@ -1,0 +1,18 @@
+# Arquivos do sistema do Mac
+.DS_Store
+Thumbs.db
+
+# Arquivos gerados por IDEs (Xcode, VS Code, etc)
+.vscode/
+.xcuserdata/
+*.xcodeproj/
+*.sln
+*.vcxproj
+
+# Arquivos compilados e executáveis
+*.o
+*.obj
+*.out
+*.app
+bin/
+build/
