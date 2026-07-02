@@ -3,10 +3,38 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <cstdio>
+#include <random>
+#include <iostream>
+#include <list>
+
+#include "../include/base.h"
+#include "../include/vetor2d.h"
+#include "../include/inimigo.h"
+#include "../include/projetil.h"
+
 
 const int LARGURA = 800;
 const int ALTURA = 600;
 const float FPS = 60.0;
+
+
+Vetor2D posicaoAleatoriaNaBorda(float largura, float altura) {
+    static std::random_device rd;
+    static std::mt19937 gerador(rd());
+    std::uniform_int_distribution<int> sorteioLado(0, 3);
+    std::uniform_real_distribution<float> sorteioX(0.0f, largura);
+    std::uniform_real_distribution<float> sorteioY(0.0f, altura);
+
+    int lado = sorteioLado(gerador); // 0=topo, 1=direita, 2=baixo, 3=esquerda
+
+    switch (lado) {
+        case 0: return {sorteioX(gerador), 0.0f};
+        case 1: return {largura, sorteioY(gerador)};
+        case 2: return {sorteioX(gerador), altura};
+        default: return {0.0f, sorteioY(gerador)};
+    }
+}
+
 
 int main(int argc, char **argv) {
     if(!al_init()) {
@@ -35,6 +63,16 @@ int main(int argc, char **argv) {
 
     al_start_timer(timer);
 
+    Vetor2D posicaoBase = {350.0f, 250.0f};
+    Base base(posicaoBase, 100, 80, 100); 
+
+    std::list<Projetil> projeteis;
+    std::list<Inimigo> inimigos;
+
+    float cronometroSpawn = 0.0f;
+    float intervaloSpawnAtual = 3.0f;   // começa spawnando a cada 3s
+    const float intervaloSpawnMinimo = 0.8f; // nunca fica mais rápido que isso
+
     bool rodando = true;
     bool redesenhando = true;
 
@@ -43,6 +81,33 @@ int main(int argc, char **argv) {
         al_wait_for_event(event_queue, &event);
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
+            float deltaTime = 1.0f / FPS;
+            
+            base.atualizar(deltaTime);
+
+            cronometroSpawn += deltaTime;
+            if (cronometroSpawn >= intervaloSpawnAtual) {
+                Vetor2D posNova = posicaoAleatoriaNaBorda(LARGURA, ALTURA);
+                inimigos.emplace_back(posNova, /*vidaMaxima=*/30, /*alcanceMaximoProjetil=*/100.0f);
+                cronometroSpawn = 0.0f;
+
+                // aumenta a dificuldade aos poucos
+                intervaloSpawnAtual = std::max(intervaloSpawnMinimo, intervaloSpawnAtual * 0.97f);
+            }
+
+            // --- atualizar inimigos existentes ---
+            for (Inimigo& inimigo : inimigos) {
+                inimigo.atualizar(deltaTime, base.getPosicao(), projeteis); // ver nota abaixo
+            }
+
+            // --- remover inimigos mortos ---
+            inimigos.remove_if([](const Inimigo& i) { return i.estaMorto(); });
+
+            for (Projetil& projetil : projeteis) {
+                projetil.atualizar(deltaTime);
+            }
+            projeteis.remove_if([](const Projetil& p) { return p.ultrapassouAlcance(); });
+
             redesenhando = true;
         } else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
             rodando = false;
@@ -52,12 +117,19 @@ int main(int argc, char **argv) {
         if (redesenhando && al_is_event_queue_empty(event_queue)) {
             redesenhando = false;
 
-            al_clear_to_color(al_map_rgb(0, 0, 0));
+            al_clear_to_color(al_map_rgb(255, 255, 255));
+            base.desenhar();
 
-            al_draw_text(font, al_map_rgb(255, 255, 255), LARGURA / 2, ALTURA / 2, ALLEGRO_ALIGN_CENTRE, "Hello, Allegro!");
+            for (const Inimigo& inimigo : inimigos) {
+                inimigo.desenhar();
+            }
+
+            for (const Projetil& projetil : projeteis) {
+                projetil.desenhar();
+            }
 
             al_flip_display();
-            redesenhando = false;
+            
         }
     }
 
@@ -65,6 +137,6 @@ int main(int argc, char **argv) {
     al_destroy_timer(timer);
     al_destroy_display(display);
     al_destroy_event_queue(event_queue);
-    
+
     return 0;
 }

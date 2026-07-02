@@ -19,6 +19,11 @@ include_directories(
     ${ALLEGRO_INCLUDE_DIRS}
 )
 
+if(WIN32)
+    add_compile_definitions(_POSIX_C_SOURCE=200809L)
+    add_compile_definitions(__STDC_WANT_LIB_EXT1__=1)
+endif()
+
 link_directories(${ALLEGRO_LIBRARY_DIRS})
 
 file(GLOB SRC_FILES

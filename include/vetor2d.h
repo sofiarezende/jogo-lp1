@@ -5,6 +5,9 @@ struct Vetor2D {
     float x = 0.0f;
     float y = 0.0f;
 
+    Vetor2D() = default;
+    Vetor2D(float x, float y) : x(x), y(y) {}
+
     Vetor2D operator+(const Vetor2D& outro) const {
         return Vetor2D(x + outro.x, y + outro.y);
     }

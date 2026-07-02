@@ -8,17 +8,7 @@ class Base {
 public:
     Base(const Vetor2D& posicao, float largura, float altura, int vidaMaxima);
 
-    void atualizar(float deltaTime) {
-        tempoRegeneracao += deltaTime;
-
-        if(tempoRegeneracao >= intervaloRegeneracao) {
-            if (vida < vidaMaxima) {
-                vida++;
-            }
-            tempoRegeneracao = 0.0f;
-        }
-
-    }
+    void atualizar(float deltaTime);
 
     void desenhar() const;
 

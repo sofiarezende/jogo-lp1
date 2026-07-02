@@ -18,6 +18,8 @@ public:
 
     Vetor2D getPosicao() const;
 
+    Dono getDono() const;
+
 private:
     Vetor2D posicao;
     Vetor2D posicaoInicial;
