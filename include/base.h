@@ -33,6 +33,8 @@ private:
     float largura, altura;
     int vida;
     int vidaMaxima;
+
+    // Variáveis para controle da regeneração de vida
     float tempoRegeneracao = 0.0f;
     float intervaloRegeneracao = 2.0f; // Tempo em segundos para regenerar vida
 };
