@@ -1,9 +1,9 @@
-#include "../include/jogo.h"
-#include "../include/Heroi.h"
-#include "../include/Base.h"
-#include "../include/Inimigo.h"
-#include "../include/Projetil.h"
-#include "../include/Municao.h"
+#include "jogo.h"
+#include "heroi.h"
+#include "base.h"
+#include "inimigo.h"
+#include "projetil.h"
+#include "municao.h"
 
 #include <list>
 #include <cstdio>

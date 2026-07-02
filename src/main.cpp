@@ -8,7 +8,7 @@
 #include <list>
 
 #include "../include/vetor2d.h"
-#include "../include/Jogo.h"
+#include "../include/jogo.h"
 
 
 const int LARGURA = 800;
