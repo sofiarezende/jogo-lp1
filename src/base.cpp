@@ -46,6 +46,6 @@ bool Base::contemPonto(const Vetor2D& ponto) const {
 }
 
 Vetor2D Base::getPosicao() const {
-    return posicao;
+    return posicao + Vetor2D(largura / 2.0f, altura / 2.0f); // Retorna o centro da base
 }
 

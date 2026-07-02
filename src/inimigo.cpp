@@ -22,6 +22,8 @@ void Inimigo::atualizar(float deltaTime, const Vetor2D& alvo, std::list<Projetil
             cronometroTiro = 0.0f; // Reinicia o cronômetro de tiro
         }
     }
+
+    posicao = posicao + (alvo - posicao).normalizar() * 50.0f * deltaTime; // Move em direção ao alvo
 }
 
 void Inimigo::desenhar() const {

@@ -106,7 +106,18 @@ int main(int argc, char **argv) {
             for (Projetil& projetil : projeteis) {
                 projetil.atualizar(deltaTime);
             }
+
+            projeteis.remove_if([&base](const Projetil& p) {
+                if (p.getDono() == Dono::INIMIGO && base.contemPonto(p.getPosicao())) {
+                    base.receberDano(10); // ajuste o valor de dano ao gosto
+                    return true; // remove o projétil da lista
+                }
+                return false;
+            });
+
             projeteis.remove_if([](const Projetil& p) { return p.ultrapassouAlcance(); });
+
+
 
             redesenhando = true;
         } else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
