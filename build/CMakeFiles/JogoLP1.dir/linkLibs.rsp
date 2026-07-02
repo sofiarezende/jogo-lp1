@@ -1,1 +1,0 @@
-  -LC:/msys64/mingw64/bin/../lib  -lallegro_image -lallegro_ttf -lallegro_font -lallegro_primitives -lallegro -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

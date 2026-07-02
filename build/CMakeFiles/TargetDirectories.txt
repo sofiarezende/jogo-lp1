@@ -1,3 +1,0 @@
-C:/dev/jogo-lp1/build/CMakeFiles/JogoLP1.dir
-C:/dev/jogo-lp1/build/CMakeFiles/edit_cache.dir
-C:/dev/jogo-lp1/build/CMakeFiles/rebuild_cache.dir
