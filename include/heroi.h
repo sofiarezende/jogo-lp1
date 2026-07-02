@@ -1,12 +1,14 @@
 #pragma once
 #include "vetor2d.h"
 #include <list>
+#include <allegro5/allegro.h> 
 
 class Projetil;
 
 class Heroi {
 public:
     Heroi(const Vetor2D& posicaoInicial, int vidaMaxima, int municaoInicial, float alcanceMaximoProjetil);
+    ~Heroi(); 
 
     void definirDestino(const Vetor2D& destino);
     void atualizar(float deltaTime);
@@ -15,7 +17,6 @@ public:
     void receberDano(int dano);
     bool estaVivo() const;
     
-    /// Chamado quando o jogador aperta Q
     void atirar(Vetor2D& posicaoMouse, std::list<Projetil>& listaProjetis);
 
     void ganharMunicao(int quantidade);
@@ -31,4 +32,7 @@ private:
     int vidaMaxima;
     int municao;
     float alcanceMaximoProjetil;
+
+    ALLEGRO_BITMAP* imagemTartaruga;
+    float angulo; 
 };
