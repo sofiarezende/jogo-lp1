@@ -1,7 +1,20 @@
-#include "heroi.h"
+#include "../include/heroi.h"
+#include "../include/projetil.h"
+#include "../include/vetor2d.h"
+
 #include <allegro5/allegro.h>           
 #include <allegro5/allegro_image.h>     
 #include <allegro5/allegro_primitives.h>
+
+#include <iostream>
+
+Heroi::Heroi(const Vetor2D& posicaoInicial, int vidaMaxima, int municaoInicial, float alcanceMaximoProjetil)
+    : posicao(posicaoInicial), vida(vidaMaxima), vidaMaxima(vidaMaxima), angulo(0.0f) {
+    imagemTartaruga = al_load_bitmap("../assets/Schildkrote.png");
+    if (!imagemTartaruga) {
+        fprintf(stderr, "Falha ao carregar a imagem da tartaruga.\n");
+    }
+}
 
 void Heroi::desenhar() const {
     if (imagemTartaruga) {
@@ -22,4 +35,62 @@ void Heroi::desenhar() const {
         // Fallback caso a imagem dê erro
         al_draw_filled_circle(posicao.x, posicao.y, 15, al_map_rgb(0, 255, 0));
     }
+}
+
+Heroi::~Heroi() {
+    if (imagemTartaruga) {
+        al_destroy_bitmap(imagemTartaruga);
+    }
+}
+
+void Heroi::definirDestino(const Vetor2D& destino) {
+    this->destino = destino;
+}
+
+void Heroi::atualizar(float deltaTime) {
+    Vetor2D direcao = destino - posicao;
+    float distancia = direcao.magnitude();
+
+    if (distancia > 1.0f) {
+        direcao.normalizar();
+        posicao = posicao + direcao * 200.0f * deltaTime; // Velocidade de 200 unidades por segundo
+        angulo = std::atan2(direcao.y, direcao.x);
+    }
+}
+
+void Heroi::receberDano(int dano) {
+    vida -= dano;
+    if (vida < 0) {
+        vida = 0;
+    }
+}
+
+bool Heroi::estaVivo() const {
+    return vida > 0;
+}
+
+void Heroi::atirar(Vetor2D& posicaoMouse, std::list<Projetil>& listaProjetis) {
+    if (municao > 0) {
+        Vetor2D direcao = posicaoMouse - posicao;
+        direcao.normalizar();
+        Projetil novoProjetil(posicao, direcao, 500.0f, alcanceMaximoProjetil, Dono::HEROI);
+        listaProjetis.push_back(novoProjetil);
+        municao--;
+    }
+}
+
+void Heroi::ganharMunicao(int quantidade) {
+    municao += quantidade;
+}
+
+int Heroi::getMunicao() const {
+    return municao;
+}
+
+Vetor2D Heroi::getPosicao() const {
+    return posicao;
+}
+
+int Heroi::getVida() const {
+    return vida;
 }
