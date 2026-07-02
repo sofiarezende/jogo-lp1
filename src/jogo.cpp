@@ -14,7 +14,7 @@
 Jogo::Jogo(int larguraMapa, int alturaMapa)
     : larguraMapa(larguraMapa), alturaMapa(alturaMapa),
       heroi(Vetor2D(larguraMapa / 2.0f, alturaMapa / 2.0f), 100, 0, 300.0f),
-      base(Vetor2D(larguraMapa / 2.0f , alturaMapa / 2.0f), 100, 80, 100) {
+      base(Vetor2D(larguraMapa / 2.0f - 50.0f, alturaMapa - 100.0f), 100, 80, 100) {
     // Inicialização de outros membros se necessário
 }
 
@@ -101,11 +101,11 @@ void Jogo::atualizar(float dt) {
 
     atualizarInimigos(dt);
     atualizarProjeteis(dt);
-    //atualizarMunicoes(dt);
+    ///atualizarMunicoes(dt);
 
     verificarColisoes();
     verificarSpawnDeInimigos(dt);
-    //verificarCondicoesDeFim(dt);
+    ///verificarCondicoesDeFim(dt);
 }
 
 void Jogo::desenhar() const {

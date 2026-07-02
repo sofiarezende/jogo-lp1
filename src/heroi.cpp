@@ -10,7 +10,7 @@
 
 Heroi::Heroi(const Vetor2D& posicaoInicial, int vidaMaxima, int municaoInicial, float alcanceMaximoProjetil)
     : posicao(posicaoInicial), vida(vidaMaxima), vidaMaxima(vidaMaxima), angulo(0.0f) {
-    imagemTartaruga = al_load_bitmap("../assets/Schildkrote.png");
+    imagemTartaruga = al_load_bitmap("../assets/tartaruga.png");
     if (!imagemTartaruga) {
         fprintf(stderr, "Falha ao carregar a imagem da tartaruga.\n");
     }
