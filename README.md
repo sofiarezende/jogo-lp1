@@ -6,7 +6,7 @@ Jogo 2D em C++17 + Allegro 5 sobre uma tartaruga defendendo seu ninho de ovos co
 
 - [x] Heroi com vida limitada a 100.
 - [x] Heroi com munição limitada e coleta de munição no mapa.
-- [x] Movimento do heroi por clique direito, com destino livre no mapa.
+- [x] Movimento do heroi por WASD, com destino livre no mapa.
 - [x] Disparo do heroi com `Q`, mirando no cursor no momento do tiro.
 - [x] Inimigos surgindo nas bordas do mapa em intervalo que diminui com o tempo.
 - [x] Inimigos com visual de gaivotas se movendo em direção ao heroi.
