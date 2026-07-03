@@ -1,10 +1,19 @@
 #pragma once
+<<<<<<< HEAD
 #include "Heroi.h"
 #include "Base.h"
 #include "Inimigo.h"
 #include "Projetil.h"
 #include "Municao.h"
 
+=======
+#include "jogo.h"
+#include "heroi.h"
+#include "base.h"
+#include "inimigo.h"
+#include "projetil.h"
+#include "municao.h"
+>>>>>>> 099ce3a81de9292348f7b42934566b3e9b23d364
 #include <list>
 #include <queue>
 #include <vector>

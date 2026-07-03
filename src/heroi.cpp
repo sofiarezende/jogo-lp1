@@ -18,11 +18,21 @@ Heroi::Heroi(const Vetor2D& posicaoInicial, int vidaMaxima, int municaoInicial, 
 
 void Heroi::desenhar() const {
     if (imagemTartaruga) {
+        // Dimensões exatas calculadas por frame
         float frameLargura = 96.0f;
         float frameAltura = 48.0f;
 
-        // Cria o recorte da primeira tartaruga (coluna 0, linha 0)
-        ALLEGRO_BITMAP* subTartaruga = al_create_sub_bitmap(imagemTartaruga, 0, 0, frameLargura, frameAltura);
+        // Índices corretos da folha de sprite (0-based)
+        // Linha 4 (quarta linha de cima para baixo) -> Índice 3
+        // Coluna 1 (primeira coluna da esquerda)     -> Índice 0
+        int indiceColuna = 0; 
+        int indiceLinha = 3;  
+
+        float corteX = indiceColuna * frameLargura;
+        float corteY = indiceLinha * frameAltura;
+
+        // Cria o recorte exato da tartaruga escolhida
+        ALLEGRO_BITMAP* subTartaruga = al_create_sub_bitmap(imagemTartaruga, corteX, corteY, frameLargura, frameAltura);
 
         if (subTartaruga) {
             // Desenha o recorte rotacionando pelo centro dele
