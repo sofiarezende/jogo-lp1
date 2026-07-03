@@ -4,14 +4,25 @@
 #include "Inimigo.h"
 #include "Projetil.h"
 #include "Municao.h"
+
 #include <list>
 #include <queue>
+#include <vector>
+#include <iostream>
+
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_image.h>
+
+
+
 
 enum class EstadoJogo { JOGANDO, VITORIA, DERROTA };
 
 class Jogo {
 public:
     Jogo(int larguraMapa, int alturaMapa);
+    ~Jogo();
 
     void processarClique(Vetor2D posicaoMouse);
     void processarTiro(Vetor2D posicaoMouse);
@@ -20,6 +31,9 @@ public:
 
     EstadoJogo getEstado() const;
 
+
+    
+
 private:
     int larguraMapa, alturaMapa;
 
@@ -27,7 +41,7 @@ private:
     Base base;
     std::list<Inimigo> inimigos;
     std::list<Projetil> projeteis;
-    std::queue<Municao> municoesNoChao; // ou o que você decidiu no Desafio 13
+    std::vector<Municao> municoesNoChao;
 
     float cronometroSpawn = 0.0f;
     float intervaloSpawnAtual = 3.0f;
@@ -37,11 +51,15 @@ private:
 
     EstadoJogo estado = EstadoJogo::JOGANDO;
 
-    // TODO: métodos privados de apoio, ex:
+    
     void atualizarInimigos(float dt);
     void atualizarProjeteis(float dt);
     void atualizarMunicoes(float dt);
     void verificarColisoes();
     void verificarSpawnDeInimigos(float dt);
     void verificarCondicoesDeFim(float dt);
+
+    ALLEGRO_BITMAP* itensSheet;
+    std::vector<ALLEGRO_BITMAP*> spritesItens;
+    
 };

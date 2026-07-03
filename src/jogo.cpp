@@ -1,26 +1,48 @@
-#include "../include/jogo.h"
-#include "../include/Heroi.h"
-#include "../include/Base.h"
-#include "../include/Inimigo.h"
-#include "../include/Projetil.h"
-#include "../include/Municao.h"
+#include "jogo.h"
+#include "heroi.h"
+#include "base.h"
+#include "inimigo.h"
+#include "projetil.h"
+#include "municao.h"
 
 #include <list>
+#include <vector>
 #include <cstdio>
 #include <random>
 #include <iostream>
 #include <queue>
 
+const int ITEM_LARGURA = 16;
+const int ITEM_ALTURA = 16;
+
 Jogo::Jogo(int larguraMapa, int alturaMapa)
     : larguraMapa(larguraMapa), alturaMapa(alturaMapa),
       heroi(Vetor2D(larguraMapa / 2.0f, alturaMapa / 2.0f), 100, 0, 300.0f),
       base(Vetor2D(larguraMapa / 2.0f - 50.0f, alturaMapa - 100.0f), 100, 80, 100) {
-    // Inicialização de outros membros se necessário
+
+        itensSheet = al_load_bitmap("../assets/shoreThings_PaperPluto_demo.png");
+        if (!itensSheet) {
+            fprintf(stderr, "Falha ao carregar shoreThings_PaperPluto_demo.png\n");
+        } else {
+            // Criar sprites apenas se a imagem carregou
+            std::vector<std::pair<int,int>> posicoesValidas = {{0, 0}, {0, 1}, {0, 2}, {1, 0}};
+            for (const auto& [linha, col] : posicoesValidas) {
+                spritesItens.push_back(al_create_sub_bitmap(
+                    itensSheet, col * ITEM_LARGURA, linha * ITEM_ALTURA, ITEM_LARGURA, ITEM_ALTURA));
+            }
+        }
 }
 
-void Jogo::processarClique(Vetor2D posicaoMouse) {
-    heroi.definirDestino(posicaoMouse);
+Jogo::~Jogo() {
+    for (auto sprite : spritesItens) {
+        if (sprite) al_destroy_bitmap(sprite);
+    }
+    if (itensSheet) al_destroy_bitmap(itensSheet);
 }
+
+/*void Jogo::processarClique(Vetor2D posicaoMouse) {
+    heroi.definirDestino(posicaoMouse);
+}*/
 
 void Jogo::processarTiro(Vetor2D posicaoMouse) {
     heroi.atirar(posicaoMouse, projeteis);
@@ -46,6 +68,17 @@ void Jogo::atualizarProjeteis(float dt) {
 
         if (it->ultrapassouAlcance()) {
             it = projeteis.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void Jogo::atualizarMunicoes(float dt) {
+    for (auto it = municoesNoChao.begin(); it != municoesNoChao.end(); ) {
+        it->atualizar(dt);
+        if (it->estaExpirada()) {
+            it = municoesNoChao.erase(it);
         } else {
             ++it;
         }
@@ -101,7 +134,7 @@ void Jogo::atualizar(float dt) {
 
     atualizarInimigos(dt);
     atualizarProjeteis(dt);
-    ///atualizarMunicoes(dt);
+    atualizarMunicoes(dt);
 
     verificarColisoes();
     verificarSpawnDeInimigos(dt);
@@ -117,6 +150,10 @@ void Jogo::desenhar() const {
 
     for (const Projetil& projetil : projeteis) {
         projetil.desenhar();
+    }
+
+    for (const Municao& municao : municoesNoChao) { 
+        municao.desenhar(spritesItens);
     }
 
     heroi.desenhar();

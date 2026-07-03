@@ -7,16 +7,13 @@
 #include <iostream>
 #include <list>
 
-#include "../include/vetor2d.h"
-#include "../include/Jogo.h"
+#include "vetor2D.h"
+#include "jogo.h"
 
 
 const int LARGURA = 800;
 const int ALTURA = 600;
 const float FPS = 60.0;
-
-
-
 
 
 int main(int argc, char **argv) {
