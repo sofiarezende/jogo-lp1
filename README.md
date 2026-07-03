@@ -69,3 +69,7 @@ Se o jogo for iniciado a partir da pasta `build`, os assets sao localizados norm
 
 Os arquivos de som ficam em `assets/som/`.
 
+## Grupo
+- Sofia Oliveira Rezende ()
+- Thais Evelin Barbosa da Silva (20250039913)
+
