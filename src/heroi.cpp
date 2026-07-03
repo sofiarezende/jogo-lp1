@@ -3,54 +3,50 @@
 #include "../include/vetor2d.h"
 
 #include <allegro5/allegro.h>           
-#include <allegro5/allegro_image.h>     
 #include <allegro5/allegro_primitives.h>
 
+#include <vector>
+
 #include <iostream>
+#include <cmath>
+#include <random>
 
 Heroi::Heroi(const Vetor2D& posicaoInicial, int vidaMaxima, int municaoInicial, float alcanceMaximoProjetil)
-    : posicao(posicaoInicial), vida(vidaMaxima), vidaMaxima(vidaMaxima), angulo(0.0f) {
-    imagemTartaruga = al_load_bitmap("../assets/tartaruga.png");
-    if (!imagemTartaruga) {
-        fprintf(stderr, "Falha ao carregar a imagem da tartaruga.\n");
-    }
-}
+    : posicao(posicaoInicial), destino(posicaoInicial), vida(vidaMaxima), vidaMaxima(vidaMaxima), municao(municaoInicial), alcanceMaximoProjetil(alcanceMaximoProjetil), angulo(0.0f) {}
 
-void Heroi::desenhar() const {
-    if (imagemTartaruga) {
-        // Dimensões exatas calculadas por frame
-        float frameLargura = 96.0f;
-        float frameAltura = 48.0f;
-
-        // Índices corretos da folha de sprite (0-based)
-        // Linha 4 (quarta linha de cima para baixo) -> Índice 3
-        // Coluna 1 (primeira coluna da esquerda)     -> Índice 0
-        int indiceColuna = 0; 
-        int indiceLinha = 3;  
-
-        float corteX = indiceColuna * frameLargura;
-        float corteY = indiceLinha * frameAltura;
-
-        // Cria o recorte exato da tartaruga escolhida
-        ALLEGRO_BITMAP* subTartaruga = al_create_sub_bitmap(imagemTartaruga, corteX, corteY, frameLargura, frameAltura);
-
-        if (subTartaruga) {
-            // Desenha o recorte rotacionando pelo centro dele
-            al_draw_scaled_rotated_bitmap(subTartaruga, frameLargura / 2.0f, frameAltura / 2.0f, posicao.x, posicao.y, 1.0f, 1.0f, angulo, 0);
-
-            // Destrói o sub-bitmap temporário para limpar a memória
-            al_destroy_bitmap(subTartaruga);
+void Heroi::desenhar(const std::vector<ALLEGRO_BITMAP*>& spritesHeroi) const {
+    if (!spritesHeroi.empty() && spritesHeroi[0]) {
+        int indiceSprite = 0;
+        if (spritesHeroi.size() >= 3) {
+            indiceSprite = static_cast<int>(std::fmod(std::fabs(angulo) * 10.0f, 3.0f));
         }
-    } else {
-        // Fallback caso a imagem dê erro
-        al_draw_filled_circle(posicao.x, posicao.y, 15, al_map_rgb(0, 255, 0));
-    }
-}
 
-Heroi::~Heroi() {
-    if (imagemTartaruga) {
-        al_destroy_bitmap(imagemTartaruga);
+        ALLEGRO_BITMAP* sprite = spritesHeroi[indiceSprite];
+        if (sprite) {
+            al_draw_scaled_rotated_bitmap(
+                sprite,
+                al_get_bitmap_width(sprite) / 2.0f,
+                al_get_bitmap_height(sprite) / 2.0f,
+                posicao.x,
+                posicao.y,
+                1.45f,
+                1.45f,
+                angulo + (ALLEGRO_PI * 0.5f),
+                0);
+            return;
+        }
     }
+
+    const ALLEGRO_COLOR corpo = al_map_rgb(46, 134, 88);
+    const ALLEGRO_COLOR contorno = al_map_rgb(20, 54, 37);
+    const ALLEGRO_COLOR casco = al_map_rgb(94, 155, 89);
+
+    al_draw_filled_ellipse(posicao.x, posicao.y, 30.0f, 22.0f, casco);
+    al_draw_filled_circle(posicao.x, posicao.y, 13.0f, corpo);
+    al_draw_ellipse(posicao.x, posicao.y, 30.0f, 22.0f, contorno, 2.0f);
+
+    Vetor2D ponta(posicao.x + std::cos(angulo) * 32.0f, posicao.y + std::sin(angulo) * 32.0f);
+    al_draw_line(posicao.x, posicao.y, ponta.x, ponta.y, al_map_rgb(255, 255, 255), 2.0f);
 }
 
 void Heroi::definirDestino(const Vetor2D& destino) {
@@ -63,9 +59,38 @@ void Heroi::atualizar(float deltaTime) {
 
     if (distancia > 1.0f) {
         direcao.normalizar();
-        posicao = posicao + direcao * 200.0f * deltaTime; // Velocidade de 200 unidades por segundo
+        float velocidade = 200.0f;
+        float passo = velocidade * deltaTime;
+
+        if (passo >= distancia) {
+            posicao = destino;
+        } else {
+            posicao = posicao + direcao * passo;
+        }
+
         angulo = std::atan2(direcao.y, direcao.x);
     }
+}
+
+void Heroi::moverComDirecao(const Vetor2D& direcaoEntrada, float deltaTime, float larguraMapa, float alturaMapa) {
+    if (direcaoEntrada.magnitude() <= 0.001f) {
+        return;
+    }
+
+    Vetor2D direcao = direcaoEntrada;
+    direcao.normalizar();
+
+    float velocidade = 220.0f;
+    Vetor2D novaPosicao = posicao + direcao * velocidade * deltaTime;
+
+    if (novaPosicao.x < 0.0f) novaPosicao.x = 0.0f;
+    if (novaPosicao.y < 0.0f) novaPosicao.y = 0.0f;
+    if (novaPosicao.x > larguraMapa) novaPosicao.x = larguraMapa;
+    if (novaPosicao.y > alturaMapa) novaPosicao.y = alturaMapa;
+
+    posicao = novaPosicao;
+    destino = posicao;
+    angulo = std::atan2(direcao.y, direcao.x);
 }
 
 void Heroi::receberDano(int dano) {
@@ -75,18 +100,36 @@ void Heroi::receberDano(int dano) {
     }
 }
 
+void Heroi::curar(int quantidade) {
+    vida += quantidade;
+    if (vida > vidaMaxima) {
+        vida = vidaMaxima;
+    }
+}
+
 bool Heroi::estaVivo() const {
     return vida > 0;
 }
 
-void Heroi::atirar(Vetor2D& posicaoMouse, std::list<Projetil>& listaProjetis) {
-    if (municao > 0) {
-        Vetor2D direcao = posicaoMouse - posicao;
-        direcao.normalizar();
-        Projetil novoProjetil(posicao, direcao, 500.0f, alcanceMaximoProjetil, Dono::HEROI);
-        listaProjetis.push_back(novoProjetil);
-        municao--;
+bool Heroi::atirar(const Vetor2D& posicaoMouse, std::list<Projetil>& listaProjetis) {
+    if (municao <= 0) {
+        return false;
     }
+
+    Vetor2D direcao = posicaoMouse - posicao;
+    if (direcao.magnitude() <= 0.001f) {
+        return false;
+    }
+
+    direcao.normalizar();
+
+    static std::random_device rd;
+    static std::mt19937 gerador(rd());
+    std::uniform_int_distribution<int> sorteioSprite(0, 3);
+
+    listaProjetis.emplace_back(posicao, direcao, 500.0f, alcanceMaximoProjetil, Dono::HEROI, sorteioSprite(gerador));
+    municao--;
+    return true;
 }
 
 void Heroi::ganharMunicao(int quantidade) {
@@ -95,6 +138,10 @@ void Heroi::ganharMunicao(int quantidade) {
 
 int Heroi::getMunicao() const {
     return municao;
+}
+
+int Heroi::getVidaMaxima() const {
+    return vidaMaxima;
 }
 
 Vetor2D Heroi::getPosicao() const {

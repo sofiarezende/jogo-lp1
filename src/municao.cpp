@@ -23,8 +23,16 @@ Municao::Municao(const Vetor2D& posicao, int quantidade, float tempoDeVida)
     indiceSprite = sorteio(gerador);
 }
 
+void Municao::setIndiceSprite(int novoIndice) {
+    indiceSprite = novoIndice;
+}
+
 int Municao::getIndiceSprite() const {
     return indiceSprite;
+}
+
+int Municao::getQuantidade() const {
+    return quantidade;
 }
 
 void Municao::atualizar(float deltaTime) {
@@ -32,8 +40,21 @@ void Municao::atualizar(float deltaTime) {
 }
 
 void Municao::desenhar(const std::vector<ALLEGRO_BITMAP*>& sprites) const {
-    ALLEGRO_BITMAP* sprite = sprites[indiceSprite];
-    al_draw_bitmap(sprite, posicao.x - ITEM_LARGURA / 2, posicao.y - ITEM_ALTURA / 2, 0);
+    if (!sprites.empty() && indiceSprite >= 0 && indiceSprite < static_cast<int>(sprites.size()) && sprites[indiceSprite]) {
+        al_draw_scaled_bitmap(
+            sprites[indiceSprite],
+            0, 0,
+            al_get_bitmap_width(sprites[indiceSprite]),
+            al_get_bitmap_height(sprites[indiceSprite]),
+            posicao.x - 12.0f,
+            posicao.y - 12.0f,
+            24.0f,
+            24.0f,
+            0);
+        return;
+    }
+
+    al_draw_filled_circle(posicao.x, posicao.y, 8.0f, al_map_rgb(255, 255, 0));
 }
 
 bool Municao::estaExpirada() const {

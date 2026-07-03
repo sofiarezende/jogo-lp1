@@ -1,9 +1,6 @@
 #pragma once
 #include "vetor2d.h"
 
-//todo: separar a interface da implementação, talvez em base.cpp
-//todo: implementar as funções (apenas atualizar esta implementada)
-
 class Base {
 public:
     Base(const Vetor2D& posicao, float largura, float altura, int vidaMaxima);
@@ -17,6 +14,8 @@ public:
     bool contemPonto(const Vetor2D& ponto) const;
 
     Vetor2D getPosicao() const;
+    int getVida() const;
+    int getVidaMaxima() const;
 
 private:
     Vetor2D posicao;

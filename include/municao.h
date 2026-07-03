@@ -1,5 +1,6 @@
 #pragma once
 #include "vetor2d.h"
+#include <list>
 #include <vector>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -16,6 +17,7 @@ public:
     Vetor2D getPosicao() const;
     int getQuantidade() const;
     int getIndiceSprite() const;
+    void setIndiceSprite(int novoIndice);
 
 private:
     Vetor2D posicao;

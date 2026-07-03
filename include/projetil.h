@@ -1,5 +1,8 @@
 #pragma once
 #include "vetor2d.h"
+#include <vector>
+
+struct ALLEGRO_BITMAP;
 
 enum class Dono {
     HEROI,
@@ -8,10 +11,10 @@ enum class Dono {
 
 class Projetil {
 public:
-    Projetil(const Vetor2D& posicaoInicial, const Vetor2D& direcao, float velocidade, float alcanceMaximo, Dono dono);
+    Projetil(const Vetor2D& posicaoInicial, const Vetor2D& direcao, float velocidade, float alcanceMaximo, Dono dono, int indiceSpriteVisual = -1);
 
     void atualizar(float deltaTime);
-    void desenhar() const;
+    void desenhar(const std::vector<ALLEGRO_BITMAP*>& spritesItens) const;
 
     bool ultrapassouAlcance() const;
     bool foiCriadorPor(Dono dono) const;
@@ -29,4 +32,5 @@ private:
     float alcanceMaximo;
 
     Dono dono;
+    int indiceSpriteVisual;
 };
