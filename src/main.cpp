@@ -5,6 +5,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
+#include <algorithm>
 #include <cstdio>
 #include <vector>
 
@@ -14,6 +15,7 @@
 namespace {
     constexpr int LARGURA = 1280;
     constexpr int ALTURA = 720;
+    constexpr float ESCALA_TELA = 0.90f;
     constexpr float FPS = 60.0f;
     constexpr int FRAME_INIMIGO_LARGURA = 48;
     constexpr int FRAME_INIMIGO_ALTURA = 48;
@@ -77,6 +79,33 @@ namespace {
         if (baixo) direcao.y += 1.0f;
         return direcao;
     }
+
+    void calcularTamanhoJanela(int& largura, int& altura) {
+        ALLEGRO_MONITOR_INFO monitorInfo;
+        if (!al_get_monitor_info(0, &monitorInfo)) {
+            largura = LARGURA;
+            altura = ALTURA;
+            return;
+        }
+
+        const int larguraDisponivel = static_cast<int>((monitorInfo.x2 - monitorInfo.x1) * ESCALA_TELA);
+        const int alturaDisponivel = static_cast<int>((monitorInfo.y2 - monitorInfo.y1) * ESCALA_TELA);
+
+        const float escalaLargura = static_cast<float>(larguraDisponivel) / static_cast<float>(LARGURA);
+        const float escalaAltura = static_cast<float>(alturaDisponivel) / static_cast<float>(ALTURA);
+        const float escala = std::min(escalaLargura, escalaAltura);
+
+        largura = std::max(960, static_cast<int>(LARGURA * escala));
+        altura = std::max(540, static_cast<int>(ALTURA * escala));
+    }
+
+    Vetor2D converterParaCoordenadasLogicas(const ALLEGRO_DISPLAY* display, int x, int y) {
+        const float larguraJanela = static_cast<float>(al_get_display_width(const_cast<ALLEGRO_DISPLAY*>(display)));
+        const float alturaJanela = static_cast<float>(al_get_display_height(const_cast<ALLEGRO_DISPLAY*>(display)));
+        return Vetor2D(
+            static_cast<float>(x) * (static_cast<float>(LARGURA) / larguraJanela),
+            static_cast<float>(y) * (static_cast<float>(ALTURA) / alturaJanela));
+    }
 }
 
 void desenharHud(const Jogo& jogo, ALLEGRO_FONT* font) {
@@ -135,8 +164,23 @@ int main(int argc, char **argv) {
     al_install_mouse();
     al_reserve_samples(16);
 
-    ALLEGRO_DISPLAY* display = al_create_display(LARGURA, ALTURA);
-    al_set_window_position(display, 200, 200);
+    int larguraJanela = LARGURA;
+    int alturaJanela = ALTURA;
+    calcularTamanhoJanela(larguraJanela, alturaJanela);
+
+    ALLEGRO_DISPLAY* display = al_create_display(larguraJanela, alturaJanela);
+    if (!display) {
+        fprintf(stderr, "Falha ao criar a janela do jogo.\n");
+        return -1;
+    }
+
+    ALLEGRO_MONITOR_INFO monitorInfo;
+    if (al_get_monitor_info(0, &monitorInfo)) {
+        al_set_window_position(
+            display,
+            monitorInfo.x1 + (monitorInfo.x2 - monitorInfo.x1 - larguraJanela) / 2,
+            monitorInfo.y1 + (monitorInfo.y2 - monitorInfo.y1 - alturaJanela) / 2);
+    }
 
     ALLEGRO_FONT* font = al_create_builtin_font();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / FPS);
@@ -207,9 +251,11 @@ int main(int argc, char **argv) {
         } else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
             rodando = false;
         } else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            Vetor2D posicaoMouse = converterParaCoordenadasLogicas(display, event.mouse.x, event.mouse.y);
+
             if (jogo.getEstado() != EstadoJogo::JOGANDO && event.mouse.button == 1) {
-                bool dentroReplay = event.mouse.x >= REPLAY_X && event.mouse.x <= REPLAY_X + REPLAY_LARGURA &&
-                                    event.mouse.y >= REPLAY_Y && event.mouse.y <= REPLAY_Y + REPLAY_ALTURA;
+                bool dentroReplay = posicaoMouse.x >= REPLAY_X && posicaoMouse.x <= REPLAY_X + REPLAY_LARGURA &&
+                                    posicaoMouse.y >= REPLAY_Y && posicaoMouse.y <= REPLAY_Y + REPLAY_ALTURA;
                 if (dentroReplay) {
                     jogo.reiniciar();
                     teclaEsquerda = false;
@@ -218,7 +264,7 @@ int main(int argc, char **argv) {
                     teclaBaixo = false;
                 }
             } else if (event.mouse.button == 2 && jogo.getEstado() == EstadoJogo::JOGANDO) {
-                jogo.processarClique(Vetor2D(static_cast<float>(event.mouse.x), static_cast<float>(event.mouse.y)));
+                jogo.processarClique(posicaoMouse);
             }
         } else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
             if (event.keyboard.keycode == ALLEGRO_KEY_LEFT || event.keyboard.keycode == ALLEGRO_KEY_A) {
@@ -232,7 +278,7 @@ int main(int argc, char **argv) {
             } else if (event.keyboard.keycode == ALLEGRO_KEY_Q && jogo.getEstado() == EstadoJogo::JOGANDO) {
                 ALLEGRO_MOUSE_STATE estadoMouse;
                 al_get_mouse_state(&estadoMouse);
-                jogo.processarTiro(Vetor2D(static_cast<float>(estadoMouse.x), static_cast<float>(estadoMouse.y)));
+                jogo.processarTiro(converterParaCoordenadasLogicas(display, estadoMouse.x, estadoMouse.y));
             } else if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
                 rodando = false;
             }
@@ -252,6 +298,13 @@ int main(int argc, char **argv) {
         if (redesenhando && al_is_event_queue_empty(event_queue)) {
             redesenhando = false;
 
+            const float escalaX = static_cast<float>(al_get_display_width(display)) / static_cast<float>(LARGURA);
+            const float escalaY = static_cast<float>(al_get_display_height(display)) / static_cast<float>(ALTURA);
+            ALLEGRO_TRANSFORM transformacao;
+            al_identity_transform(&transformacao);
+            al_scale_transform(&transformacao, escalaX, escalaY);
+            al_use_transform(&transformacao);
+
             al_clear_to_color(al_map_rgb(194, 229, 244));
             if (backgroundSheet) {
                 al_draw_scaled_bitmap(backgroundSheet, 0, 0, al_get_bitmap_width(backgroundSheet), al_get_bitmap_height(backgroundSheet), 0, 0, LARGURA, ALTURA, 0);
@@ -264,6 +317,8 @@ int main(int argc, char **argv) {
             }
 
             al_flip_display();
+            al_identity_transform(&transformacao);
+            al_use_transform(&transformacao);
             
         }
     }
