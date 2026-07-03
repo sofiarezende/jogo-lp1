@@ -20,8 +20,6 @@ Jogo 2D em C++17 + Allegro 5 sobre uma tartaruga defendendo seu ninho de ovos co
 - [x] Sprites carregados uma unica vez no `main.cpp` e recortados em sub-bitmaps.
 - [x] Sons de ambiente, tiro e dano da base: `oceano.wav`, `tiros.wav` e `ovos_quebrando.ogg`.
 - [x] Botao de replay na tela final.
-- [x] Tartaruga usando a linha 4 verde do sprite sheet.
-- [x] Projeteis do heroi usando o mesmo visual dos projeteis da gaivota.
 
 ## Conceitos usados
 
