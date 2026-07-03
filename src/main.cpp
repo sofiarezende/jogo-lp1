@@ -7,13 +7,8 @@
 #include <iostream>
 #include <list>
 
-<<<<<<< HEAD
 #include "vetor2D.h"
 #include "jogo.h"
-=======
-#include "../include/vetor2d.h"
-#include "../include/jogo.h"
->>>>>>> 099ce3a81de9292348f7b42934566b3e9b23d364
 
 
 const int LARGURA = 800;
